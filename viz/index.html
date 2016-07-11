@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style> /* set the CSS */
+
+body { font: 12px Arial;}
+
+path {
+    stroke: steelblue;
+    stroke-width: 1;
+    fill: none;
+    opacity: 0.3
+}
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: lightgrey;
+        stroke-width: 1;
+        shape-rendering: crispEdges;
+        opacity: 0.4    
+    }
+
+
+
+</style>
+<body>
+
+<!-- load the d3.js library -->
+<script src="http://d3js.org/d3.v3.min.js"></script>
+
+<script>
+
+// Set the dimensions of the canvas / graph
+var margin = {top: 30, right: 20, bottom: 30, left: 50},
+width = 625 - margin.left - margin.right,
+height = 300 - margin.top - margin.bottom;
+
+// Set the ranges
+var x = d3.scale.linear().range([0, width]);
+var y = d3.scale.linear().range([height, 0]);
+
+// Define the axes
+var xAxis = d3.svg.axis().scale(x)
+    .orient("bottom").ticks(12).tickSize(-height, 0, 0);
+
+var yAxis = d3.svg.axis().scale(y)
+    .orient("left").ticks(5).tickSize(-width, 0, 0);
+
+var color = d3.scale.ordinal();
+
+// Define the line
+var valueline = d3.svg.line()
+    .defined(function(d) { return d.val!=NaN; })
+    .interpolate("cardinal")
+    .x(function(d) { return x(d.idx); })
+    .y(function(d) { return y(d.val); });
+
+// Adds the svg canvas
+var svg = d3.select("body")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top +
+          ")");
+
+// Get the data
+d3.csv("sequences.csv", function(error, data) {
+    color.domain(d3.keys(data[0]).filter(function(key) { return key !== "idx"; }));
+    
+    data.forEach(function(d) {
+        d.idx = +d.idx;
+    });
+    
+    var seqs = color.domain().map(function(s) {
+        return {
+            seq: s,
+            values: data.map(function(d) {
+                return {idx: +d.idx, val: +d[s]}
+            })
+        };
+    });
+    
+    // Scale the range of the data
+    x.domain(d3.extent(data, function(d) { return d.idx; }));
+    // y.domain([
+    //     d3.min(seqs, function(c) { return d3.min(c.values, function(v) { return v.val; }); }),
+    //     d3.max(seqs, function(c) { return d3.max(c.values, function(v) { return v.val; }); })
+    // ]);
+    y.domain([0, 40]);
+    
+    var seq = svg.selectAll(".seq")
+        .data(seqs)
+        .enter().append("g")
+        .attr("class", "seq")
+
+    // Add the value line path.
+    seq.append("path")
+        .attr("class", "line")
+        .attr("d", function(d) { return valueline(d.values); })
+        .style("stroke", function(d) { return color(d.seq); })
+        .on("mouseover", function (d) {
+            d3.select(this)              
+                .style("stroke-width",'2px')
+                .style("stroke",'steelblue')
+                .style("opacity", 1.0);
+        })
+        .on("mouseout",function(d) {     
+            d3.select(this)
+                .style("stroke-width",'1px')
+                .style("stroke", function(d) { return color(d.seq); })
+                .style("opacity", 0.3);
+        });
+    // Add the X Axis
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+    
+    // Add the Y Axis
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis);
+
+});
+
+</script>
+</body>
+    
