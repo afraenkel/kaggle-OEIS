@@ -12,8 +12,10 @@ as well as biases associated to contributors to the site.
 
 * Descriptive stats notebook
 
-* NSTM RNN to predict next term
+* LSTM to predict next term
     - may want to segment based on "type of sequence"
+
+* Cluster types of sequences
 
 * Would be awesome to link this to description on OEIS site for NLP
   and a sort of sentiment analysis on sequence types.
