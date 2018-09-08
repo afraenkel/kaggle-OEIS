@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import pandas as pd
 
 from features import feat_list
 
@@ -29,3 +30,5 @@ def load_features():
 
                 if seq_array:
                     feats[seq_id] = {f.__name__: f(seq_array) for f in feat_list}
+
+    return pd.DataFrame(feats).T
