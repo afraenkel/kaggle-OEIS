@@ -3,9 +3,10 @@
 import os
 import pandas as pd
 
-from features import feat_list
+from oeis.etl.features import feature_list
 
-DATA = os.path.join(__file__, '../../data/raw/sequences')
+basedir = os.path.dirname(__file__)
+DATA = os.path.join(basedir, '..', '..', '..', '..', 'data', 'raw', 'sequences')
 
 def load_sequences():
     seqs = {}
@@ -29,6 +30,6 @@ def load_features():
                 seq_array = [int(x) for x in seq_array.split(',') if x]
 
                 if seq_array:
-                    feats[seq_id] = {f.__name__: f(seq_array) for f in feat_list}
+                    feats[seq_id] = {f.__name__: f(seq_array) for f in feature_list}
 
     return pd.DataFrame(feats).T
